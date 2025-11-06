@@ -114,3 +114,4 @@ def testCorrectness(test_function: callable, test_table: list) -> list:
         
     print(f"Passed {passed}/{len(test_table)} tests!")
     return failed
+
