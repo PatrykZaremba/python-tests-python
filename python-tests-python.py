@@ -28,9 +28,6 @@ def printResults(results_in_nanoseconds: list) -> None:
     print(f"Average: {average} {unit}\nDeviation: +/-{deviation} {unit}\nMinimum: {minimum} {unit}\nMaximum: {maximum} {unit}")
 
 
-
-
-
 def testPerformance(test_function: callable, test_arguments : list = None, test_kword_arguments : dict = None, iterations_per_cycle : int = 100000, seconds_per_cycle : int = None, number_of_cycles : int = 7, print_performance : bool = True) -> list:
     """Test the performance of function using a single set of arguments and return the results in nanoseconds.
 
@@ -48,7 +45,7 @@ def testPerformance(test_function: callable, test_arguments : list = None, test_
         test_arguments = []
     if not test_kword_arguments:
         test_kword_arguments = {}
-    # If user specified seconds run according to the amount of seconds
+
     if (seconds_per_cycle):
         overall_results = []
         for cycle in range(number_of_cycles):
@@ -65,12 +62,11 @@ def testPerformance(test_function: callable, test_arguments : list = None, test_
                 cycle_results.append(end_time-start_time)
             if (len(cycle_results) > 0):
                 overall_results.append(sum(cycle_results)/len(cycle_results))
-        # If user wants performance printed print
+
         if (print_performance):
             printResults(overall_results)
         return(overall_results)
     
-    # Otherwise run according to number of iterations
     overall_results = []
     for cycle in range(number_of_cycles):
         cycle_results = []
@@ -78,20 +74,21 @@ def testPerformance(test_function: callable, test_arguments : list = None, test_
             start_time = time_ns()
             try:
                 test_function(*test_arguments, **test_kword_arguments)
-            except:
+            except Exception as e:
                 print(f"Failed on cycle {cycle}, iteration {iteration}")
                 break
             end_time = time_ns()
             cycle_results.append(end_time-start_time)
         if (len(cycle_results) > 0):
             overall_results.append(sum(cycle_results)/len(cycle_results))
-    # If user wants performance printed print
+    
     if (print_performance):
         printResults(overall_results)
     return(overall_results)
 
-def testCorrectness(test_function: callable, test_table: list):
+def testCorrectness(test_function: callable, test_table: list) -> list:
     """Test the correctness of a function against a table of arguments, keyword arguments and expected results.
+    Print results and return list of names of functions that have failed.
     
     Test table is to be formated as:
     [
@@ -99,14 +96,21 @@ def testCorrectness(test_function: callable, test_table: list):
         ["test name 2", [], {}, expected_result]
     ]
     """
+    failed = []
     passed = 0
     for test in test_table:
         try:
             test_result = test_function(*test[1], **test[2])
-        except:
-            print(f"Test {test[0]} failed to execute!")
+        except Exception as e:
+            print(f"Test {test[0]} failed to execute! - {e}")
+            failed.append({test[0]})
             continue
+
         if (test_result == test[3]):
             passed += 1
         else:
             print(f"Test {test[0]} failed, expected {test[3]} of type {str(type(test[3]))}, got {test_result} of type {str(type(test_result))}!")
+            failed.append({test[0]})
+        
+    print(f"Passed {passed}/{len(test_table)} tests!")
+    return failed
